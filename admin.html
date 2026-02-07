@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>運営用管理画面</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: white;
+      padding: 20px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      color: black;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #333;
+      color: white;
+    }
+
+    .rank-1 { background: #ffd700; font-weight: bold; }
+    .rank-2 { background: #c0c0c0; font-weight: bold; }
+    .rank-3 { background: #cd7f32; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>🛠 運営用ランキング管理</h1>
+
+<button onclick="updateRanking()">🔄 更新</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>順位</th>
+      <th>グループ</th>
+      <th>点数</th>
+    </tr>
+  </thead>
+  <tbody id="ranking"></tbody>
+</table>
+
+<script>
+const GAS_URL = "ここにGASのWebアプリURL";
+
+function updateRanking() {
+  fetch(GAS_URL)
+    .then(res => res.json())
+    .then(data => {
+      const list = Object.entries(data)
+        .map(([group, score]) => ({ group, score }))
+        .sort((a, b) => b.score - a.score);
+
+      let prevScore = null;
+      let displayRank = 0;
+
+      const tbody = document.getElementById("ranking");
+      tbody.innerHTML = "";
+
+      list.forEach((item, index) => {
+        if (item.score !== prevScore) {
+          displayRank = index + 1;
+        }
+        prevScore = item.score;
+
+        const tr = document.createElement("tr");
+        if (displayRank <= 3) tr.classList.add(`rank-${displayRank}`);
+
+        tr.innerHTML = `
+          <td>${displayRank}位</td>
+          <td>${item.group}</td>
+          <td>${item.score}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    });
+}
+</script>
+
+</body>
+</html>
